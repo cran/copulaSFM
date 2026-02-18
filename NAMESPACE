@@ -1,0 +1,6 @@
+exportPattern("^[[:alpha:]]+")
+importFrom(graphics, lines)
+importFrom(stats, dnorm, lm, optim, pnorm, qnorm, rnorm)
+importFrom(truncnorm, rtruncnorm, ptruncnorm)
+importFrom(VineCopula, BiCopPDF)
+importFrom(truncnorm, qtruncnorm)

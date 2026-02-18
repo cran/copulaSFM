@@ -1,0 +1,9 @@
+2a90dfd1a7ebedf116f74f2686cd7e3e *DESCRIPTION
+67860a3b7ca78cb8c4d138e8c1564a99 *NAMESPACE
+ed97d96f530de6b2260435c271f4606f *R/copulasfm.R
+272ba0cd5ccebaf98ea3a6e3c0f8d180 *R/sim.R
+f9cc7bd33b9aa8e5ea16e3d7fcf106a1 *R/te.R
+92ec8b2c3647368de64d23691dbe0260 *README.md
+a3dca9fed0730bd6884b58bc85dd4a60 *man/copulasfm.Rd
+a2fec54c2d9737187dafca19d6d58a42 *man/sfa.simu.Rd
+6dd176d0edc473be9efb9318e937e47e *man/te.Rd
