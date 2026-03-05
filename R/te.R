@@ -10,61 +10,106 @@
 #EX: te1=TE1(coef,Y,X,family=family)
 
 
-TE1<-function(theta,Y,X,family){
+#' @export
+TE1 <- function(theta, Y, X, family,
+                nSim = 200,
+                rho2 = NULL,
+                seed = NULL,
+                plot = FALSE) {
 
-  midX=X
-  midY=Y
-  XX=as.matrix(cbind(1,midX))
-  K=ncol(XX)
-  sigmav=abs(theta[K+1])
-  sigmau=abs(theta[K+2])
-  rho=theta[K+3]
-  n=length(midY)
-  m=n
+  if (!is.null(seed)) set.seed(seed)
 
+  Y  <- as.numeric(Y)
+  X  <- as.matrix(X)
+  XX <- cbind(1, X)
 
-  w=c(midY-t(theta[1:K])%*%t(XX))
-  u=replicate(n,rtruncnorm(n, a=0.001, b=Inf, mean = 0, sd = sigmau))
-  W=t(replicate(n,w))
-  gv=dnorm(u+W,mean=0,sd=sigmav)+0.000001
-  gv=matrix(t(gv),nrow=n,ncol=n)
-  Gv=pnorm(u+W,mean=0,sd=sigmav)
+  n  <- length(Y)
+  K  <- ncol(XX)
 
-  Fu=ptruncnorm(u, a=0.0001, b=Inf, mean = 0, sd = sigmau)
+  beta   <- theta[1:K]
+  sigmav <- abs(theta[K + 1])
+  sigmau <- abs(theta[K + 2])
+  rho    <- theta[K + 3]
 
-  Fu=c(abs(Fu))
-  Gvv=c(abs(Gv))
-  mm=length(Fu)
-  for ( i in 1:mm){
-    if (is.infinite(Fu[i]))  # control for optimization
-      Fu=0.0000000000000001
-    if (is.infinite(Gvv[i]))  # control for optimization
-      Gvv=0.000000000000001
-    if (is.nan(Fu[i]))  # control for optimization
-      Fu=0.00000000000001
-    if (is.nan(Gvv[i]))  # control for optimization
-      Gvv=0.00000000000001
+  if (is.null(rho2) && length(theta) >= (K + 4))
+    rho2 <- theta[K + 4]
+
+  # residual
+  w <- as.vector(Y - XX %*% beta)
+
+  # ----------------------------
+  # Simulation draw: u ~ truncated normal
+  # ----------------------------
+  u_std <- matrix(
+    truncnorm::rtruncnorm(
+      n * nSim,
+      a = 0,
+      b = Inf,
+      mean = 0,
+      sd = 1
+    ),
+    nrow = n,
+    ncol = nSim
+  )
+
+  u <- sigmau * u_std
+  W <- matrix(w, n, nSim)
+
+  # ----------------------------
+  # Normal noise density
+  # ----------------------------
+  gv <- stats::dnorm(u + W, mean = 0, sd = sigmav)
+  Gv <- stats::pnorm(u + W, mean = 0, sd = sigmav)
+
+  Fu <- truncnorm::ptruncnorm(
+    u,
+    a = 0,
+    b = Inf,
+    mean = 0,
+    sd = sigmau
+  )
+
+  gv[!is.finite(gv) | gv <= 0] <- 1e-12
+  Gv[!is.finite(Gv)] <- 1e-12
+  Fu[!is.finite(Fu)] <- 1e-12
+
+  # ----------------------------
+  # Copula density
+  # ----------------------------
+  cop <- .copula_pdf(
+    u1 = as.vector(Fu),
+    u2 = as.vector(Gv),
+    family = family,
+    rho = rho,
+    rho2 = rho2
+  )
+
+  cop[!is.finite(cop) | cop <= 0] <- 1e-12
+  cop_mat <- matrix(cop, n, nSim)
+
+  wgt <- gv * cop_mat
+
+  # ----------------------------
+  # TE = E[exp(-u) | epsilon]
+  # ----------------------------
+  num <- rowMeans(exp(-u) * wgt)
+  den <- rowMeans(wgt)
+  den[den <= 1e-300] <- 1e-300
+
+  te <- num / den
+
+  # ----------------------------
+  # Optional plot
+  # ----------------------------
+  if (plot) {
+    graphics::plot(
+      sort(te, decreasing = TRUE),
+      type = "l",
+      xlab = "Observation",
+      ylab = "Technical Efficiency",
+      main = "Technical Efficiency"
+    )
   }
 
-  if (family==2){
-    rho2=theta[length(theta)]
-    gaucopula=BiCopPDF(Fu, Gvv, family=family, par=rho, par2=rho2)+0.00000001
-  }else{
-    gaucopula=BiCopPDF(Fu, Gvv, family=family, par=rho, par2=0)+0.00000001}
-
-  gaucopula=matrix(gaucopula,nrow=m,ncol=n)
-
-  hw=1/n*diag(gv%*%gaucopula) # A
-  tu=sapply(u,mean)
-  tcltcopula=sapply(gaucopula,mean)
-  tgv=sapply(t(gv),mean)
-  hw2=exp(-tu)*tcltcopula*tgv
-  hw2=matrix(hw2,nrow=n,ncol=n)
-  hw2=colMeans(hw2) # B
-  # technical efficiency TE=A/B
-  te=hw2/hw
-  n=length(te)
-  plot(te,lty=1,col="white",xlab = 'observation', ylab = 'TE value', main = "Technical Efficiency")
-  lines(te, lty=1,type="l",col="blue")
   return(te)
 }

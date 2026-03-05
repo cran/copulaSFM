@@ -1,7 +1,7 @@
 Package: copulaSFM
 Type: Package
-Title: Copula-Based Simultaneous Stochastic Frontier Models
-Version: 0.1.0
+Title: Copula-Based Stochastic Frontier Models
+Version: 0.2.0
 Authors@R: c(
   person("Woraphon", "Yamaka",
          email = "woraphon.econ@gmail.com",
@@ -27,12 +27,12 @@ Description: Provides estimation procedures for copula-based stochastic frontier
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.3.3
-Imports: stats, graphics, truncnorm, VineCopula
+Imports: stats, graphics, truncnorm, VineCopula, MASS
 NeedsCompilation: no
-Packaged: 2026-02-15 04:02:34 UTC; Acer
+Packaged: 2026-03-05 03:58:06 UTC; Acer
 Author: Woraphon Yamaka [aut, cre],
   Paravee Maneejuk [aut],
   Nuttaphong Kaewtathip [aut]
 Maintainer: Woraphon Yamaka <woraphon.econ@gmail.com>
 Repository: CRAN
-Date/Publication: 2026-02-18 19:00:02 UTC
+Date/Publication: 2026-03-05 04:10:02 UTC

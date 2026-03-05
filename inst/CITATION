@@ -1,0 +1,12 @@
+bibentry(
+  bibtype = "Manual",
+  title = "copulaSFM: Copula-Based Stochastic Frontier Models",
+  author = c(
+    person("Woraphon", "Yamaka"),
+    person("Paravee", "Maneejuk"),
+    person("Nuttaphong", "Kaewtathip")
+  ),
+  year = "2026",
+  note = "R package version 0.2.0",
+  url = "https://CRAN.R-project.org/package=copulaSFM"
+)
